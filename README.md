@@ -24,9 +24,6 @@ Copy code
 Add the correct dependency (e.g. lowrisc:prim:prim_alert_pkg:0.1) to i2c.core.
 
 ## 2. Example: Missing Variable (NumLcStates)
-Error
-perl
-Copy code
 %Error: Can't find definition of variable: 'NumLcStates'
 Root Cause
 The i2c.core depended on lc_ctrl_pkg, but its .core file didn’t include the RTL file that defines NumLcStates.
