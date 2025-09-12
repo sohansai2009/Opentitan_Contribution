@@ -23,30 +23,32 @@ Copy code
   fusesoc list-cores | grep prim_alert
 Add the correct dependency (e.g. lowrisc:prim:prim_alert_pkg:0.1) to i2c.core.
 
-## 2. Example: Missing Variable (NumLcStates)
+## 2. Example: Missing Variable (`NumLcStates`)
+
+### Error
 %Error: Can't find definition of variable: 'NumLcStates'
-Root Cause
-The i2c.core depended on lc_ctrl_pkg, but its .core file didn’t include the RTL file that defines NumLcStates.
 
-That definition exists inside lc_ctrl_state_pkg.
+### Root Cause
+- The `i2c.core` depended on `lc_ctrl_pkg`, but the corresponding `.core` file didn’t include the RTL file that defines `NumLcStates`.  
+- That definition exists inside **`lc_ctrl_state_pkg`**.
 
-Fix
-Updated lc_ctrl_pkg.core to include the missing file so Verilator could see the definition.
+### Fix
+- Updated `lc_ctrl_pkg.core` to include the missing RTL file.  
+- After this change, Verilator was able to see the definition and the error was resolved.
 
 ## 3. The .tpl File Problem
 After fixing the dependency, a new issue appeared:
 
 The file containing NumLcStates is not a SystemVerilog file but a template:
 
-swift
-Copy code
+## Error
 hw/ip/lc_ctrl/rtl/lc_ctrl_state_pkg.sv.tpl
 Templates (.tpl) must be expanded into .sv before tools like Verilator can use them.
 
 ## 4. Generating .sv from .tpl
 There are two ways:
 
-✅ A. OpenTitan’s Normal Flow (Recommended)
+✅ A. OpenTitan’s Normal Flow
 OpenTitan uses Bazel to generate auto-generated RTL.
 Run:
 
