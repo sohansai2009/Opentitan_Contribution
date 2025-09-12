@@ -23,7 +23,7 @@ Copy code
   fusesoc list-cores | grep prim_alert
 Add the correct dependency (e.g. lowrisc:prim:prim_alert_pkg:0.1) to i2c.core.
 
-2. Example: Missing Variable (NumLcStates)
+## 2. Example: Missing Variable (NumLcStates)
 Error
 perl
 Copy code
@@ -36,7 +36,7 @@ That definition exists inside lc_ctrl_state_pkg.
 Fix
 Updated lc_ctrl_pkg.core to include the missing file so Verilator could see the definition.
 
-3. The .tpl File Problem
+## 3. The .tpl File Problem
 After fixing the dependency, a new issue appeared:
 
 The file containing NumLcStates is not a SystemVerilog file but a template:
@@ -46,7 +46,7 @@ Copy code
 hw/ip/lc_ctrl/rtl/lc_ctrl_state_pkg.sv.tpl
 Templates (.tpl) must be expanded into .sv before tools like Verilator can use them.
 
-4. Generating .sv from .tpl
+## 4. Generating .sv from .tpl
 There are two ways:
 
 ✅ A. OpenTitan’s Normal Flow (Recommended)
