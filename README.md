@@ -1,4 +1,4 @@
-# OpenTitan Linting Notes (I2C IP)
+# OpenTitan Linting Notes (using fusesoc) (I2C IP)
 
 This document captures the issues I faced while performing lint analysis on the I²C IP core in OpenTitan, along with the fixes I applied. It serves as a reference for future debugging.
 
