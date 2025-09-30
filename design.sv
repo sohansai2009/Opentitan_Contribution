@@ -40,14 +40,20 @@ module gf(clk,rst,in1,in2,out1,out2);
     end
   
   
-  //define state transition for scl
-  always_comb begin
-    case(state_scl)
-      reset_scl: next_state_scl=idle_scl;
-      idle_scl: next_state_scl=((out1==in1))?idle_scl:counting_scl;
-      counting_scl: next_state_scl=((count1==n1 && in1==reg1) ||(in1!=reg1))? idle_scl:counting_scl;
-    endcase
-  end
+always_comb begin
+  case(state_scl)
+    reset_scl   : next_state_scl = idle_scl;
+    idle_scl    : next_state_scl = (in1==1) ? counting_scl : idle_scl;
+    counting_scl: begin
+                    if ((in1==reg1) && (count1==n1))
+                      next_state_scl = idle_scl;   // stable → accept
+                    else if (in1!=reg1)
+                      next_state_scl = idle_scl;   // unstable → reject
+                    else
+                      next_state_scl = counting_scl;
+                  end
+  endcase
+end
   
   
   //state transistion for sda
@@ -94,49 +100,38 @@ module gf(clk,rst,in1,in2,out1,out2);
     end
               
   //define the operation in each state for scl
-  always_ff @(posedge clk)
-    begin
-      case(state_scl)
-        //reset everything to zero
-        reset_scl: begin
-          out1<=0;
-          reg1<=0;
-        end
-        
-        idle_scl: begin
-          if(out1!=in1)
-            begin
-              reg1<=in1;
-              count1<=1;
-            end
-          else if(out1==in1)
-            begin
-              reg1<=0;
-            end
-        end
-              
-        counting_scl:
-          begin
-            //check for stability of in1
-            if(in1==reg1)
-              //only if input value remains same, increment the counter by 1 in each clock cycle
-              begin
-                count1=count1+1;
-                if(count1==n1) //after n clock cycles, in would be the same, cause, if 'in' was not same, then counter would have reset to 1
-                  begin
-                    out1<=reg1; //input valid
-                  end
-              end
-            //checking stability for in2  
-            else if(in1!=reg1)
-             begin
-               count1=1;
-               out1<=0;
-             end
-             
-          end
-      endcase
+  always_ff @(posedge clk) begin
+  case(state_scl)
+    reset_scl: begin
+      out1   <= 0;
+      reg1   <= 0;
+      count1 <= 0;
     end
+    idle_scl: begin
+      if(in1==1)
+        begin
+          reg1=in1;
+          count1<=1;
+        end
+      else if(in1==0 )
+        begin
+          //after checking stability for 5 clock cycles, you need to wait for n cycles to retain the actual high oulse before de-asserting the clock pulse to zero
+          out1<=out1;
+          count1=count1-1;
+          if(count1==1)
+            out1<=0;
+          reg1=0;
+        end
+    end
+    counting_scl: begin
+      if (in1==reg1) begin
+        count1 = count1 + 1;
+        if (count1==n1)
+          out1 <= in1;   // update output only after stabilit
+      end
+    end
+  endcase
+end
 endmodule
   
   
